@@ -6,11 +6,14 @@ experiments:
     parameters:
       experiment:
         image: "alpine:latest"
-        command: [ "sh", "-c", "while true; do :; done"]
+        command: ["sh", "-c", "echo pwned > /tmp/malicious-activity-log && sleep 3600"]
         privileged: true
         hostPid: true
         hostNetwork: true
         runAsRoot: true
+        capabilities:
+          - NET_ADMIN
+          - SYS_ADMIN
       verifier:
         deployed: true
         command:
