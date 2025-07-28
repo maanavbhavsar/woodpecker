@@ -27,12 +27,13 @@ type PrivilegedContainerExperimentConfig struct {
 // PrivilegedContainer is an experiment that creates a deployment with a privileged container
 type PrivilegedContainer struct {
 	Experiment struct {
-		Image       string   `yaml:"image"`
-		Command     []string `yaml:"command"`
-		Privileged  bool     `yaml:"privileged"`
-		HostPid     bool     `yaml:"hostPid"`
-		HostNetwork bool     `yaml:"hostNetwork"`
-		RunAsRoot   bool     `yaml:"runAsRoot"`
+		Image        string   `yaml:"image"`
+		Command      []string `yaml:"command"`
+		Privileged   bool     `yaml:"privileged"`
+		HostPid      bool     `yaml:"hostPid"`
+		HostNetwork  bool     `yaml:"hostNetwork"`
+		RunAsRoot    bool     `yaml:"runAsRoot"`
+		Capabilities []string `yaml:"capabilities"`
 	} `yaml:"experiment"`
 	Verifier struct {
 		DeployedSuccessfully bool     `yaml:"deployed"`
@@ -129,6 +130,16 @@ func (p *PrivilegedContainerExperimentConfig) Run(ctx context.Context, experimen
 
 	if params.Privileged {
 		securityContext.Privileged = pointer.Bool(true)
+	}
+
+	if len(params.Capabilities) > 0 {
+		capAdd := []corev1.Capability{}
+		for _, cap := range params.Capabilities {
+			capAdd = append(capAdd, corev1.Capability(cap))
+		}
+		securityContext.Capabilities = &corev1.Capabilities{
+			Add: capAdd,
+		}
 	}
 
 	container.SecurityContext = securityContext
